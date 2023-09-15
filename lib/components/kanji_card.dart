@@ -62,12 +62,29 @@ class KanjiCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text('Kanji: $kanji',
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              // Take the maximum width its parent can give
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: const Color.fromRGBO(186, 237, 255, 0.3),
+                border: Border.all(
+                  color: Colors.blue,
+                  width: 1.0,
+                ),
+                borderRadius: BorderRadius.circular(4.0),
+              ),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  kanji,
+                  style: const TextStyle(fontSize: 70),
+                ),
+              ),
+            ),
+            Divider(),
             Row(
               children: radicalData
                   .map((radical) => RadicalComponent(radicalData: radical))
