@@ -48,7 +48,7 @@ class KanjiCard extends StatelessWidget {
       final onyomi = (group['readings'] as List)
           .where((val) => val['type'] == 'ja_on')
           .map((val) =>
-      "${val['value']}『${HiveDatabase.toHiragana(val['value'])}』")
+              "${val['value']}『${HiveDatabase.toHiragana(val['value'])}』")
           .toList();
 
       final kunyomi = (group['readings'] as List)
@@ -130,6 +130,7 @@ class KanjiCard extends StatelessWidget {
           children: [
             Container(
               width: double.infinity,
+              alignment: Alignment.center,
               // Take the maximum width its parent can give
               padding: const EdgeInsets.all(8.0),
               decoration: BoxDecoration(
@@ -140,18 +141,21 @@ class KanjiCard extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(4.0),
               ),
-              child: Row(children: [
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    kanji,
-                    style: const TextStyle(fontSize: 70),
-                  ),
-                ),
-                FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: KanjiDrawingAnimation('0${ucs[0]}')),
-              ]),
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  // Aligns children to the center
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        kanji,
+                        style: const TextStyle(fontSize: 70),
+                      ),
+                    ),
+                    FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: KanjiDrawingAnimation('0${ucs[0]}')),
+                  ]),
             ),
             const Divider(),
             Container(
