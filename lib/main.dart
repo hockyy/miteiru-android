@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive/hive.dart';
 import 'package:miteiru/background/hive_database.dart';
 import 'package:miteiru/pages/home_page.dart';
 import 'package:path_provider/path_provider.dart';
+
+const locale = Locale("ja", "JP");
 
 Future<void> main() async {
   runApp(MyApp());
@@ -22,6 +25,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
         title: 'Flutter Demo',
+        locale: locale,
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          locale,
+        ],
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
               seedColor: const Color.fromRGBO(240, 246, 254, 0)),

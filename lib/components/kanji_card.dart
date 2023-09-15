@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:miteiru/background/hive_database.dart';
+import 'package:miteiru/components/kanji_drawing_animation.dart';
 import 'package:miteiru/components/radical_component.dart';
 import 'group_component.dart';
 
@@ -47,7 +48,7 @@ class KanjiCard extends StatelessWidget {
       final onyomi = (group['readings'] as List)
           .where((val) => val['type'] == 'ja_on')
           .map((val) =>
-              "${val['value']}『${HiveDatabase.toHiragana(val['value'])}』")
+      "${val['value']}『${HiveDatabase.toHiragana(val['value'])}』")
           .toList();
 
       final kunyomi = (group['readings'] as List)
@@ -115,6 +116,10 @@ class KanjiCard extends StatelessWidget {
     String mnemonic = kanjiData.isNotEmpty ? kanjiData['meaning_mnemonic'] : "";
     var bubbleBox = generateBubbleBox(kanjiAnalysis);
     var groups = generateGroups(kanjiAnalysis);
+    final ucs = kanjiAnalysis['codepoints']
+        .where((val) => val['type'] == 'ucs')
+        .map((val) => val['value'])
+        .toList();
 
     return Card(
       margin: const EdgeInsets.all(8),
@@ -135,13 +140,18 @@ class KanjiCard extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(4.0),
               ),
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  kanji,
-                  style: const TextStyle(fontSize: 70),
+              child: Row(children: [
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    kanji,
+                    style: const TextStyle(fontSize: 70),
+                  ),
                 ),
-              ),
+                FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: KanjiDrawingAnimation('0${ucs[0]}')),
+              ]),
             ),
             const Divider(),
             Container(
