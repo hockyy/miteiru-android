@@ -62,12 +62,11 @@ class KanjiCard extends StatelessWidget {
 
       // You will need to implement how you want to open these external links in Flutter
       final urls = [
-        'https://jisho.org/search/${kanjiAnalysis['literal']}',
+        'https://jisho.org/search/${kanjiAnalysis['literal']}%20%23kanji',
         'https://www.wanikani.com/kanji/${kanjiAnalysis['literal']}',
         'https://tangorin.com/kanji/${kanjiAnalysis['literal']}',
         'https://kanji.koohii.com/study/kanji/${kanjiAnalysis['literal']}',
       ];
-      print(meanings);
       return {
         'Meanings': meanings,
         '音読み (Onyomi)': onyomi,
@@ -116,7 +115,6 @@ class KanjiCard extends StatelessWidget {
     String mnemonic = kanjiData.isNotEmpty ? kanjiData['meaning_mnemonic'] : "";
     var bubbleBox = generateBubbleBox(kanjiAnalysis);
     var groups = generateGroups(kanjiAnalysis);
-    print(groups);
 
     return Card(
       margin: const EdgeInsets.all(8),

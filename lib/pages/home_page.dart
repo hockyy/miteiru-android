@@ -29,8 +29,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
       for (int i = 0; i < text.length; i++) {
         var kanjiAnalysis = HiveDatabase.queryKanjidic(text[i]);
-        print(kanjiAnalysis);
-        print(HiveDatabase.currentKanjidicSize());
         if (kanjiAnalysis == null) continue;
         var meaning = HiveDatabase.queryKanji(text[i]);
         List<Map<String, dynamic>> radicals = [];

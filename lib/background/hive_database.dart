@@ -26,7 +26,6 @@ class HiveDatabase {
       await Future.wait([
         loadJson("kanjidic"),
       ]).then((List<Map<String, dynamic>> loadedFiles) {
-        print(loadedFiles[0]['characters'].length);
         for (var entry in loadedFiles[0]["characters"]) {
           _kanjidic.put(entry["literal"], entry);
         }
