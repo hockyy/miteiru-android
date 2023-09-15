@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:miteiru/background/hive_database.dart';
 import 'package:miteiru/components/radical_component.dart';
+import 'group_component.dart';
 
 class KanjiCard extends StatelessWidget {
   final String kanji;
   final Map<String, dynamic> kanjiData;
   final List<Map<String, dynamic>> radicalData;
+  final Map<String, dynamic> kanjiAnalysis;
 
   const KanjiCard({
     Key? key,
     required this.kanji,
     required this.kanjiData,
     required this.radicalData,
+    required this.kanjiAnalysis,
   }) : super(key: key);
 
   TextSpan buildStyledText(String content, Color color, FontWeight fontWeight) {
@@ -18,6 +22,59 @@ class KanjiCard extends StatelessWidget {
       text: content,
       style: TextStyle(color: color, fontWeight: fontWeight),
     );
+  }
+
+  List<Widget> generateBubbleBox(Map<String, dynamic> kanjiAnalysis) {
+    final jlpt = kanjiAnalysis['misc']['jlptLevel'];
+    final grade = kanjiAnalysis['misc']['grade'];
+    final frequency = kanjiAnalysis['misc']['frequency'];
+    final strokeCounts = kanjiAnalysis['misc']['strokeCounts']?[0];
+
+    return [
+      if (jlpt != null) Chip(label: Text('JLPT N$jlpt')),
+      if (grade != null) Chip(label: Text('Grade $grade')),
+      if (frequency != null) Chip(label: Text('Top $frequency kanji')),
+      if (strokeCounts != null)
+        Chip(label: Text('$strokeCounts writing strokes')),
+    ];
+  }
+
+  List<Map<String, dynamic>> generateGroups(
+      Map<String, dynamic> kanjiAnalysis) {
+    final List<dynamic> groups = kanjiAnalysis['readingMeaning']['groups'];
+
+    return groups.map((group) {
+      final onyomi = (group['readings'] as List)
+          .where((val) => val['type'] == 'ja_on')
+          .map((val) =>
+              "${val['value']}『${HiveDatabase.toHiragana(val['value'])}』")
+          .toList();
+
+      final kunyomi = (group['readings'] as List)
+          .where((val) => val['type'] == 'ja_kun')
+          .map((val) => val['value'])
+          .toList();
+
+      final meanings = (group['meanings'] as List)
+          .where((val) => val['lang'] == 'en')
+          .map((val) => val['value'])
+          .toList();
+
+      // You will need to implement how you want to open these external links in Flutter
+      final urls = [
+        'https://jisho.org/search/${kanjiAnalysis['literal']}',
+        'https://www.wanikani.com/kanji/${kanjiAnalysis['literal']}',
+        'https://tangorin.com/kanji/${kanjiAnalysis['literal']}',
+        'https://kanji.koohii.com/study/kanji/${kanjiAnalysis['literal']}',
+      ];
+      print(meanings);
+      return {
+        'Meanings': meanings,
+        '音読み (Onyomi)': onyomi,
+        '訓読み (Kunyomi)': kunyomi,
+        'Urls': urls,
+      };
+    }).toList();
   }
 
   Widget buildMnemonic(String mnemonic) {
@@ -56,7 +113,11 @@ class KanjiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String mnemonic = kanjiData['meaning_mnemonic'] ?? "No mnemonic found";
+    String mnemonic = kanjiData.isNotEmpty ? kanjiData['meaning_mnemonic'] : "";
+    var bubbleBox = generateBubbleBox(kanjiAnalysis);
+    var groups = generateGroups(kanjiAnalysis);
+    print(groups);
+
     return Card(
       margin: const EdgeInsets.all(8),
       child: Padding(
@@ -84,17 +145,25 @@ class KanjiCard extends StatelessWidget {
                 ),
               ),
             ),
-            Divider(),
-            Row(
-              children: radicalData
-                  .map((radical) => RadicalComponent(radicalData: radical))
-                  .toList()
-                  .expand((widget) => [widget, SizedBox(width: 10)])
-                  .toList()
-                ..removeLast(), // remove the last added SizedBox
+            const Divider(),
+            Container(
+              alignment: AlignmentDirectional.topStart,
+              child: Wrap(spacing: 10, children: bubbleBox),
+            ),
+            const Divider(),
+            Container(
+              alignment: AlignmentDirectional.topStart,
+              child: Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.start,
+                  runAlignment: WrapAlignment.start,
+                  spacing: 10,
+                  children: radicalData
+                      .map((radical) => RadicalComponent(radicalData: radical))
+                      .toList()),
             ),
             const SizedBox(height: 8),
             buildMnemonic(mnemonic),
+            ...groups.map((group) => GroupComponent(groupData: group)).toList()
           ],
         ),
       ),

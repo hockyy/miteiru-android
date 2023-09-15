@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:miteiru/background/hive_database.dart';
 import 'package:miteiru/components/kanji_card.dart';
-import 'package:miteiru/utils/utilities.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -14,57 +14,48 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _controller = TextEditingController();
-  String _inputText = ''; // New variable for storing input text
 
   List<Widget> kanjiContainer = [];
-  final kanjiJson = <String, dynamic>{};
-
-  final radicalJson = <String, dynamic>{};
 
   @override
   void initState() {
     super.initState();
     getProcessedText();
-
-    Future.wait([
-      loadJson("kanji"),
-      loadJson("radical"),
-    ]).then((List<Map<String, dynamic>> loadedFiles) {
-      setState(() {
-        kanjiJson.addAll(loadedFiles[0]);
-        radicalJson.addAll(loadedFiles[1]);
-      });
-    });
   }
 
   void processAndSetThemKanjis(String text) {
     setState(() {
-      _inputText = text;
       List<Widget> newKanjiContainer = [];
 
       for (int i = 0; i < text.length; i++) {
-        var meaning = kanjiJson[text[i]] as Map<String, dynamic>?;
+        var kanjiAnalysis = HiveDatabase.queryKanjidic(text[i]);
+        print(kanjiAnalysis);
+        print(HiveDatabase.currentKanjidicSize());
+        if (kanjiAnalysis == null) continue;
+        var meaning = HiveDatabase.queryKanji(text[i]);
+        List<Map<String, dynamic>> radicals = [];
 
         if (meaning != null) {
-          List<Map<String, dynamic>> radicals = [];
           var componentIds = meaning['component_subject_ids'];
 
           if (componentIds != null) {
             for (var radicalId in componentIds) {
-              var radicalInfo = radicalJson[radicalId] as Map<String, dynamic>?;
+              var radicalInfo = HiveDatabase.queryRadical(radicalId);
               if (radicalInfo != null) {
                 radicalInfo["radicalId"] = radicalId;
                 radicals.add(radicalInfo);
               }
             }
           }
+        } else {
+          meaning = <String, dynamic>{};
+        }
 
-          newKanjiContainer.add(KanjiCard(
+        newKanjiContainer.add(KanjiCard(
             kanji: text[i],
             kanjiData: meaning,
             radicalData: radicals,
-          ));
-        }
+            kanjiAnalysis: kanjiAnalysis));
       }
 
       kanjiContainer = newKanjiContainer;
@@ -105,7 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       hintText: 'Type something here',
                     ),
                   ),
-                  Text(_inputText),
+                  const Divider(),
                   Expanded(
                     // <-- Wrap with Expanded
                     child: SingleChildScrollView(
@@ -140,7 +131,7 @@ class _MyHomePageState extends State<MyHomePage> {
               tooltip: 'Paste',
               child: const Icon(Icons.content_paste),
             ),
-            SizedBox(width: 10), // Add a gap between buttons
+            const SizedBox(width: 10), // Add a gap between buttons
             FloatingActionButton(
               onPressed: () {
                 setState(() {

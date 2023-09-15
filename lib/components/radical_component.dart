@@ -15,7 +15,7 @@ class RadicalComponent extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(8.0),
         decoration: BoxDecoration(
-          color: Color.fromRGBO(249, 227, 225, 1),
+          color: const Color.fromRGBO(249, 227, 225, 1),
           border: Border.all(
             color: Colors.red,
             width: 1.0,
