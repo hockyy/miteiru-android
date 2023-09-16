@@ -19,7 +19,7 @@ class GroupComponent extends StatelessWidget {
                 }
               : null,
           child: Container(
-            padding: EdgeInsets.all(8),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: const Color.fromRGBO(249, 227, 225, 1),
               border: Border.all(
@@ -42,40 +42,38 @@ class GroupComponent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          const Divider(),
-          ...groupData.entries.map<Widget>((entry) {
-            final key = entry.key;
-            final value = entry.value;
+    return Column(
+      children: [
+        const Divider(),
+        ...groupData.entries.map<Widget>((entry) {
+          final key = entry.key;
+          final value = entry.value;
 
-            return Column(
-              children: [
-                const SizedBox(height: 10),
-                Text(
-                  key,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                      color: Color.fromRGBO(170, 49, 41, 1)),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: bubbleEntryReading(value),
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 8,
-                )
-              ],
-            );
-          }).toList(),
-        ],
-      ),
+          return Column(
+            children: [
+              const SizedBox(height: 10),
+              Text(
+                key,
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    color: Color.fromRGBO(170, 49, 41, 1)),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: bubbleEntryReading(value),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 8,
+              )
+            ],
+          );
+        }).toList(),
+      ],
     );
   }
 }

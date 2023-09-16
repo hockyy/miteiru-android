@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:miteiru/background/hive_database.dart';
 import 'package:miteiru/components/kanji_card.dart';
 
+import '../components/radical_component.dart';
+
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
@@ -14,7 +16,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _controller = TextEditingController();
-
+  List<bool> isExpanded = []; // To track expanded state
+  List<Widget> titleDisplay = []; // To track expanded state
   List<Widget> kanjiContainer = [];
 
   @override
@@ -26,6 +29,8 @@ class _MyHomePageState extends State<MyHomePage> {
   void processAndSetThemKanjis(String text) {
     setState(() {
       List<Widget> newKanjiContainer = [];
+      List<bool> newIsExpanded = [];
+      List<Widget> newTitleDisplay = [];
 
       for (int i = 0; i < text.length; i++) {
         var kanjiAnalysis = HiveDatabase.queryKanjidic(text[i]);
@@ -54,9 +59,28 @@ class _MyHomePageState extends State<MyHomePage> {
             kanjiData: meaning,
             radicalData: radicals,
             kanjiAnalysis: kanjiAnalysis));
+        newIsExpanded.add(false);
+        newTitleDisplay.add(Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            runAlignment: WrapAlignment.spaceEvenly,
+            spacing: 10,
+            children: [
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  text[i],
+                  style: const TextStyle(fontSize: 70),
+                ),
+              ),
+              ...radicals
+                  .map((radical) => RadicalComponent(radicalData: radical))
+                  .toList()
+            ]));
       }
 
       kanjiContainer = newKanjiContainer;
+      isExpanded = newIsExpanded;
+      titleDisplay = newTitleDisplay;
     });
   }
 
@@ -96,10 +120,33 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   const Divider(),
                   Expanded(
-                    // <-- Wrap with Expanded
                     child: SingleChildScrollView(
-                      child: Column(
-                        children: kanjiContainer,
+                      child: ExpansionPanelList(
+                        expansionCallback: (panelIndex, isExpanded) {
+                          setState(() {
+                            this.isExpanded[panelIndex] = isExpanded;
+                          });
+                        },
+                        children: kanjiContainer
+                            .asMap()
+                            .entries
+                            .map<ExpansionPanel>((entry) {
+                          int index = entry.key;
+                          Widget kanjiCard = entry.value;
+
+                          return ExpansionPanel(
+                            headerBuilder:
+                                (BuildContext context, bool isExpanded) {
+                              return ListTile(
+                                title: Container(
+                                  child: titleDisplay[index],
+                                ), // Customize this as you like
+                              );
+                            },
+                            body: kanjiCard,
+                            isExpanded: isExpanded[index],
+                          );
+                        }).toList(),
                       ),
                     ),
                   ),
